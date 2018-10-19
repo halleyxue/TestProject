@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="names">
+    <item>Kristeen Coderre</item>
+    <item>Libby Leslie</item>
+    <item>Sherika Baynes</item>
+    <item>Coralie Mckinny</item>
+    <item>Jon Timms</item>
+    <item>Ezekiel Cousineau</item>
+    </string-array>
+
+    <string-array name="top_rated_movies">
+        <item>The Shawshank Redemption</item>
+        <item>The Godfather</item>
+        <item>The Dark Knight</item>
+    </string-array>
+
+    <string-array name="most_popular_movies">
+        <item>Batman v Superman: Dawn of Justice</item>
+        <item>Captain America: Civil War</item>
+        <item>10 Cloverfield Lane</item>
+        <item>Deadpool</item>
+    </string-array>
+
+</resources>
