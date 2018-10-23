@@ -18,8 +18,6 @@ public class LoginObserver implements Observer<ViewModelData>{
     @Override
     public void onChanged(@Nullable ViewModelData viewModelData) {
         if (ViewModelData.State.SUCCESS == viewModelData.state) {
-//            result = viewModelData.getObject();
-//            System.out.println("接受数据为："+result);
             Intent intent = new Intent(activity,MainActivity.class);
             intent.putExtra("result",result);
             activity.startActivity(intent);
