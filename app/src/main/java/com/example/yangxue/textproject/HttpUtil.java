@@ -6,6 +6,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import com.alibaba.fastjson.JSON;
+import com.example.yangxue.textproject.global.Global;
+import com.example.yangxue.textproject.model.JsonMsgOut;
 
 import java.io.IOException;
 import okhttp3.Call;
@@ -18,7 +20,6 @@ import okhttp3.Response;
 
 public class HttpUtil {
 
-    public static final String SERVER_HOST="http://222.178.68.122:9092/ydmbk_yangxue";
     private static OkHttpClient client;
 
     //构建方法私有化，避免通过new的方式创建对象，而是通过getInstance获得单例对象
@@ -39,38 +40,14 @@ public class HttpUtil {
         return client;
     }
 
-    public static void getDataAsync() {
-        System.out.println("test--------------------------");
-        Request request = new Request.Builder()
-                .url("http://222.178.68.122:9092/ydmbk_yangxue/test.do")
-//                .url("https://www.baidu.com")
-                .build();
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                System.out.println("error--------------");
-                e.printStackTrace();
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                if(response.isSuccessful()){//回调的方法执行在子线程。
-                    Log.d("result","获取数据成功了");
-                    Log.d("result","response.code()=="+response.code());
-                    Log.d("result","response.body().string()=="+response.body().string());
-                }
-            }
-        });
-    }
-
-    public static Call postDataWithParame(String url, Object obj,HttpUtilCallback callback) {
+    public static Call post(String url, Object obj,HttpUtilCallback callback) {
         FormBody.Builder form_builder = new FormBody.Builder();
         String jsonParam = JSON.toJSONString(obj);
         form_builder.add("jsonStr",jsonParam);
         //声明一个请求对象体
         RequestBody request_body = form_builder.build();
         //采用post的方式进行提交
-        Request request = new Request.Builder().url(SERVER_HOST+url).post(request_body).build();
+        Request request = new Request.Builder().url(Global.SERVER_HOST+url).post(request_body).build();
         Call call = client.newCall(request);
         call.enqueue(callback);
         return call;
@@ -88,10 +65,12 @@ public class HttpUtil {
 
         @Override
         public void onFailure(Call call, IOException e) {
+            JsonMsgOut out = new JsonMsgOut();
+            out.setErrorInfos(-1,context.getString(R.string.request_server_error));
             Bundle data = new Bundle();
             Message message = new Message();
             message.what = fail;
-            data.putSerializable("data", "请求服务器失败！");
+            data.putSerializable("data", out);
             message.setData(data);
             sendMessage(message);
         }
@@ -101,13 +80,24 @@ public class HttpUtil {
             String content = response.body().string();
             Message message = new Message();
             Log.d("result","response.body().string()=="+content);
-            if (content == null || content.length() == 0) {
-                message.what = fail;
-            } else if(response.isSuccessful()){
-                message.what = success;
+            JsonMsgOut out = JSON.parseObject(content,JsonMsgOut.class);
+            if (out == null || content.length() == 0) {
+                out = new JsonMsgOut();
+                out.resultCode = -1;
+                out.errorInfos = out.new ErrorInfo();
+                out.errorInfos.errorMsg = context.getString(R.string
+                        .request_server_error);
             }
+            if (out.resultCode == 0) {
+                message.what = success;
+            }else {
+                message.what = fail;
+            }
+//            if(response.isSuccessful()){
+//                message.what = success;
+//            }
             Bundle data = new Bundle();
-            data.putSerializable("data", content);
+            data.putSerializable("data", out);
             message.setData(data);
             sendMessage(message);
         }
@@ -115,7 +105,7 @@ public class HttpUtil {
         @Override
         public void handleMessage(Message msg) {
             Bundle data = msg.getData();
-            String out = (String) data.getSerializable("data");
+            JsonMsgOut out = (JsonMsgOut) data.getSerializable("data");
             if (msg.what == success) {
                 onSuccess(out);
             } else if (msg.what == fail) {
@@ -123,9 +113,9 @@ public class HttpUtil {
             }
         }
 
-        public abstract void onSuccess(String out);
+        public abstract void onSuccess(JsonMsgOut out);
 
-        public abstract void onError(String error);
+        public abstract void onError(JsonMsgOut error);
     }
 
 }

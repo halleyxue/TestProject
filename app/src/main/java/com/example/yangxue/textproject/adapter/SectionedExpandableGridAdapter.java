@@ -12,6 +12,7 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import com.example.yangxue.textproject.R;
+import com.example.yangxue.textproject.model.MenuItem;
 
 import java.util.ArrayList;
 
@@ -61,8 +62,8 @@ public class SectionedExpandableGridAdapter extends RecyclerView.Adapter<Section
     public void onBindViewHolder(ViewHolder holder, int position) {
         switch (holder.viewType) {
             case VIEW_TYPE_ITEM :
-                final Item item = (Item) mDataArrayList.get(position);
-                holder.itemTextView.setText(item.getName());
+                final MenuItem item = (MenuItem) mDataArrayList.get(position);
+                holder.itemTextView.setText(item.getMenuName());
                 holder.view.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {

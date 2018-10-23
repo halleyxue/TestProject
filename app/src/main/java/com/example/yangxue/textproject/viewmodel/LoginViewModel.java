@@ -1,24 +1,20 @@
 package com.example.yangxue.textproject.viewmodel;
 
 import android.app.Application;
-import android.arch.lifecycle.AndroidViewModel;
-import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
+import com.alibaba.fastjson.JSON;
 import com.example.yangxue.textproject.HttpUtil;
 import com.example.yangxue.textproject.global.Global;
+import com.example.yangxue.textproject.model.JsonMsgOut;
 import com.example.yangxue.textproject.model.User;
 
-import static com.example.yangxue.textproject.activity.LoginActivity.loginUrl;
-
-public class LoginViewModel extends AndroidViewModel {
+public class LoginViewModel extends BaseViewModel {
 
     protected User user = new User();
     protected Context context;
-    protected MutableLiveData<ViewModelData> data = new MutableLiveData<>();
-    public static ViewModelData viewModelData = new ViewModelData();
-
+    public static final String loginUrl = "login.do";
 
     public LoginViewModel(@NonNull Application application) {
         super(application);
@@ -29,7 +25,7 @@ public class LoginViewModel extends AndroidViewModel {
         user.setName(userName);
         user.setPassword(userPwd);
         HttpUtil.getInstance();
-        HttpUtil.postDataWithParame(loginUrl,user,new LoginCallback(context));
+        HttpUtil.post(loginUrl,user,new LoginCallback(context));
     }
 
     class LoginCallback extends HttpUtil.HttpUtilCallback {
@@ -39,25 +35,21 @@ public class LoginViewModel extends AndroidViewModel {
         }
 
         @Override
-        public void onSuccess(String out) {
+        public void onSuccess(JsonMsgOut out) {
             if (out != null) {
-                System.out.println("服务器端返回内容：" + out);
+                User loginBeanOut = JSON.parseObject(out.getObj(), User.class);
                 viewModelData.state = ViewModelData.State.SUCCESS;
-                viewModelData.object = out;
-                Global.username = out;
+                viewModelData.object = loginBeanOut;
+                Global.username = loginBeanOut.getName();
                 data.setValue(viewModelData);
             }
         }
 
         @Override
-        public void onError(String error) {
+        public void onError(JsonMsgOut error) {
             viewModelData.state = ViewModelData.State.FAIL;
             data.setValue(viewModelData);
         }
-    }
-
-    public MutableLiveData<ViewModelData> getViewModelData() {
-        return data;
     }
 
 }
