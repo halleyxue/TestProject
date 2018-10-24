@@ -36,9 +36,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-/**
- * A login screen that offers login via name/password.
- */
 public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
 
 
@@ -53,10 +50,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     @BindView(R.id.login_progress)
     View mProgressView;
 
-    public static final String loginUrl = "/login.do";
     private LoginViewModel viewModel;
     private View contentView;
-    private LocalObserver observer;
+    private LoginObserver observer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +61,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         ButterKnife.bind(LoginActivity.this);
         contentView = findViewById(R.id.login_form);
         viewModel = ViewModelProviders.of(this).get(LoginViewModel.class);
-        observer = new LocalObserver(this);
+        observer = new LoginObserver(this);
         viewModel.getViewModelData().observe(this, observer);
 
     }
@@ -86,20 +82,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         viewModel.login(userName,userPwd);
 //        HttpUtil.getDataAsync();
     }
-
-//    class LocalObserver implements Observer<ViewModelData> {
-//
-//        @Override
-//        public void onChanged(@Nullable ViewModelData viewModelData) {
-//            if (ViewModelData.State.SUCCESS == viewModelData.state) {
-//                result = viewModelData.getObject();
-//                System.out.println("接受数据为："+result);
-//            } else if (ViewModelData.State.FAIL == viewModelData.state) {
-//                System.out.println("FAIL");
-//            }
-//        }
-//    }
-
 
 
     /**

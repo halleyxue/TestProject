@@ -15,4 +15,6 @@
     </string>
     <string name="top_rated_movies_topic">Top Rated Movies</string>
     <string name="most_popular_movies_topic">Most Popular Movies</string>
+
+    <string name="request_server_error">请求服务器失败，请稍后重试！</string>
 </resources>

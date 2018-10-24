@@ -4,15 +4,18 @@ import android.content.Context;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
+import com.example.yangxue.textproject.model.MenuItem;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 public class SectionedExpandableLayoutHelper implements SectionStateChangeListener {
 
     //data list
-    private LinkedHashMap<Section, ArrayList<Item>> mSectionDataMap = new LinkedHashMap<Section, ArrayList<Item>>();
+    private LinkedHashMap<Section, List<MenuItem>> mSectionDataMap = new LinkedHashMap<Section, List<MenuItem>>();
     private ArrayList<Object> mDataArrayList = new ArrayList<Object>();
 
     //section map
@@ -39,13 +42,13 @@ public class SectionedExpandableLayoutHelper implements SectionStateChangeListen
         mSectionedExpandableGridAdapter.notifyDataSetChanged();
     }
 
-    public void addSection(String section, ArrayList<Item> items) {
+    public void addSection(String section, List<MenuItem> items) {
         Section newSection;
         mSectionMap.put(section, (newSection = new Section(section)));
         mSectionDataMap.put(newSection, items);
     }
 
-    public void addItem(String section, Item item) {
+    public void addItem(String section, MenuItem item) {
         mSectionDataMap.get(mSectionMap.get(section)).add(item);
     }
 
@@ -60,7 +63,7 @@ public class SectionedExpandableLayoutHelper implements SectionStateChangeListen
 
     private void generateDataList () {
         mDataArrayList.clear();
-        for (Map.Entry<Section, ArrayList<Item>> entry : mSectionDataMap.entrySet()) {
+        for (Map.Entry<Section, List<MenuItem>> entry : mSectionDataMap.entrySet()) {
             Section key;
             mDataArrayList.add((key = entry.getKey()));
             if (key.isExpanded)

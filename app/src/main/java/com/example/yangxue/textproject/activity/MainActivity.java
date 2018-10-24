@@ -1,8 +1,10 @@
 package com.example.yangxue.textproject.activity;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
+import android.arch.lifecycle.Observer;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
@@ -13,10 +15,15 @@ import com.example.yangxue.textproject.adapter.Item;
 import com.example.yangxue.textproject.adapter.ItemClickListener;
 import com.example.yangxue.textproject.adapter.Section;
 import com.example.yangxue.textproject.adapter.SectionedExpandableLayoutHelper;
+import com.example.yangxue.textproject.model.MenuItem;
+import com.example.yangxue.textproject.viewmodel.MainViewModel;
+import com.example.yangxue.textproject.viewmodel.ViewModelData;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Observable;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -26,42 +33,16 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
     @BindView(R.id.menu_list)
     RecyclerView menuListView;
     private SectionedExpandableLayoutHelper sectionedExpandableLayoutHelper;
+    private MainViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(MainActivity.this);
-
-        menuListView.setItemAnimator(new DefaultItemAnimator());
-        sectionedExpandableLayoutHelper = new SectionedExpandableLayoutHelper(this,
-                menuListView, this, 2);
-
-        sectionedExpandableLayoutHelper.addSection(getString(R.string.top_rated_movies_topic), getTopRatedList());
-        sectionedExpandableLayoutHelper.addSection(getString(R.string.most_popular_movies_topic), getPopularList());
-        sectionedExpandableLayoutHelper.notifyDataSetChanged();
-    }
-
-    private ArrayList<Item> getTopRatedList() {
-        ArrayList<String> arrayList = new ArrayList<>(Arrays.asList(getResources()
-                .getStringArray(R.array.top_rated_movies)));
-
-        ArrayList<Item> movieList = new ArrayList<>();
-
-        for (String str : arrayList) {
-            movieList.add(new Item(str));
-        }
-        return movieList;
-    }
-
-    private ArrayList<Item> getPopularList(){
-        List<String> arryList = new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.most_popular_movies)));
-        ArrayList<Item> movieList = new ArrayList<>();
-
-        for (String str : arryList) {
-            movieList.add(new Item(str));
-        }
-        return movieList;
+        viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+        viewModel.getViewModelData().observe(this, new LocalObserver());
+        viewModel.loadMovieAdata();
     }
 
     private void forwardActivity(String value) {
@@ -70,6 +51,27 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
             startActivityForResult(intent,1);
 
         }
+    }
+
+    class LocalObserver implements Observer<ViewModelData>{
+
+        @Override
+        public void onChanged(@Nullable ViewModelData viewModelData) {
+            if (ViewModelData.State.SUCCESS == viewModelData.state){
+                initMainView(viewModel.getMapGrids(), viewModel.getTabsData());
+            }
+        }
+    }
+
+    private void initMainView(Map<String, List<MenuItem>> mapGrids, List<String> tabs) {
+        int gripSize = mapGrids.size();
+        menuListView.setItemAnimator(new DefaultItemAnimator());
+        sectionedExpandableLayoutHelper = new SectionedExpandableLayoutHelper(this,
+                menuListView, this, gripSize);
+        for (String tabTitle: tabs){
+            sectionedExpandableLayoutHelper.addSection(tabTitle, mapGrids.get(tabTitle));
+        }
+        sectionedExpandableLayoutHelper.notifyDataSetChanged();
     }
 
     @Override
@@ -83,8 +85,8 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
     }
 
     @Override
-    public void itemClicked(Item item) {
-        forwardActivity(item.getName());
+    public void itemClicked(MenuItem item) {
+        forwardActivity(item.getMenuName());
     }
 
     @Override
